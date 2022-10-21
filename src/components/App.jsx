@@ -12,43 +12,68 @@ export class App extends Component {
   state = {
     photos: [],
     loading: false,
+    photoCard: null,
   };
 
   async componentDidMount() {
     this.setState({ loading: true });
     try {
-      const responce = await axios.get(
-        `${BASE_URL}?key=${API_KEY}&q=yellow+flowers&image_type=photo`
-      );
+      const responce = await axios.get(BASE_URL, {
+        params: {
+          key: API_KEY,
+          per_page: 20,
+        },
+      });
 
-      this.setState({ photos: responce.data });
+      this.setState({ photos: responce.data.hits });
     } catch (error) {}
 
     this.setState({ loading: false });
   }
 
-  selectPhoto = options => {
-    console.log(options);
+  selectPhoto = async (option, page) => {
+    try {
+      const responce = await axios.get(BASE_URL, {
+        params: {
+          key: API_KEY,
+          q: option.value,
+          image_type: 'photo',
+          orientation: 'horizontal',
+          safesearch: 'true',
+          page,
+          per_page: 20,
+        },
+      });
+      this.setState({ photoCard: responce.data.hits[10] });
+      console.log(responce.data.hits[10]);
+    } catch (error) {}
   };
 
-  // buildSelectOptions = () => {
-  //   return this.state.photos.hits.map(photo => ({
-  //     value: photo.id,
-  //     label: photo.tags,
-  //   }));
-  // };
-
-  render() {
-    const option = this.state.photos.map(photo => ({
-      value: photo.id,
+  buildSelectOptions = () => {
+    return this.state.photos.map(photo => ({
+      value: photo.q,
       label: photo.tags,
     }));
+  };
+
+  render() {
+    const option = this.buildSelectOptions();
 
     return (
       <>
         <Select options={option} onChange={this.selectPhoto} />
+        {this.state.photoCard && (
+          <div>
+            CARD
+            <img
+              src={this.state.photoCard.webformatURL}
+              width="480"
+              alt={this.state.photoCard.tags}
+            />
+          </div>
+        )}
         {this.state.loading && <div>Загружаем...</div>}
-        {this.state.photos && <div>Hello</div>}
+        {this.state.photos && <div></div>}
       </>
     );
   }
@@ -63,3 +88,5 @@ export class App extends Component {
 
 //   this.setState({ photos: responce.data });
 // } catch (error) {}
+
+// `${BASE_URL}?key=${API_KEY}&q=yellow+flowers&image_type=photo`;
