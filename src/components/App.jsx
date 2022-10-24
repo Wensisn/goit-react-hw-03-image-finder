@@ -1,92 +1,96 @@
 import { Component } from 'react';
-import axios from 'axios';
-import Select from 'react-select';
-
-const BASE_URL = 'https://pixabay.com/api/';
-const API_KEY = '29490532-fde9d4c0daff56b8071258c00';
-
-// axios.defaults.baseURL = 'https://pixabay.com/api/';
-// axios.defaults.headers.common['x-api-key'] = process.env.REACT_APP_API_KEY;
+import { ImageGallery } from './ImageGallery/ImageGallery';
+import fetchImages from './FetchImages/FetchImages';
+import { Button } from './Button/Button';
+import { Searchbar } from './Searchbar/Searchbar';
+import { Loader } from './Loader/Loader';
 
 export class App extends Component {
   state = {
+    searchQuery: '',
+    page: 1,
     photos: [],
     loading: false,
     photoCard: null,
+    loadedAllPages: false,
+    isLoading: false,
+    error: null,
   };
 
-  async componentDidMount() {
-    this.setState({ loading: true });
-    try {
-      const responce = await axios.get(BASE_URL, {
-        params: {
-          key: API_KEY,
-          per_page: 20,
-        },
-      });
-
-      this.setState({ photos: responce.data.hits });
-    } catch (error) {}
-
-    this.setState({ loading: false });
+  async componentDidUpdate(prevProps, prevState) {
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      await this.loadImages();
+    }
   }
 
-  selectPhoto = async (option, page) => {
-    try {
-      const responce = await axios.get(BASE_URL, {
-        params: {
-          key: API_KEY,
-          q: option.value,
-          image_type: 'photo',
-          orientation: 'horizontal',
-          safesearch: 'true',
-          page,
-          per_page: 20,
-        },
+  changeSearchQuery = searchQuery => {
+    if (searchQuery !== this.state.searchQuery) {
+      this.setState({
+        searchQuery,
+        photos: [],
+        page: 1,
+        loadedAllPages: false,
+        error: null,
       });
-      this.setState({ photoCard: responce.data.hits[10] });
-      console.log(responce.data.hits[10]);
-    } catch (error) {}
+    }
   };
 
-  buildSelectOptions = () => {
-    return this.state.photos.map(photo => ({
-      value: photo.q,
-      label: photo.tags,
-    }));
+  loadImages = async () => {
+    const { searchQuery, page } = this.state;
+
+    if (searchQuery.trim() !== '') {
+      this.setState({ isLoading: true, error: null });
+
+      try {
+        const data = await fetchImages(searchQuery, page);
+        setTimeout(() => {
+          this.setState(prevState => {
+            const state = {
+              photos: [...prevState.photos, ...data.hits],
+              page: prevState.page + 1,
+            };
+
+            if (data.totalHits === state.photos.length) {
+              state.loadedAllPages = true;
+            }
+
+            return state;
+          });
+        }, 2000);
+      } catch (error) {
+        this.setState({ error });
+      } finally {
+        this.setState({ isLoading: false });
+      }
+    }
   };
+
+  // openImage = id => {
+  //   const photoCard = this.state.photos.find(item => item.id === id);
+  //   this.setState({ photoCard });
+  //   console.log(photoCard);
+  // };!!!!!
 
   render() {
-    const option = this.buildSelectOptions();
-
+    const { photos, searchQuery, isLoading, error } = this.state;
     return (
       <>
-        <Select options={option} onChange={this.selectPhoto} />
-        {this.state.photoCard && (
-          <div>
-            CARD
-            <img
-              src={this.state.photoCard.webformatURL}
-              width="480"
-              alt={this.state.photoCard.tags}
-            />
-          </div>
+        <Searchbar onSubmit={this.changeSearchQuery} />
+
+        {photos && (
+          <ImageGallery
+            photos={this.state.photos}
+            page={this.state.page}
+            // onClick={this.openImage}!!!!!!
+          />
         )}
-        {this.state.loading && <div>Загружаем...</div>}
-        {this.state.photos && <div></div>}
+
+        {this.state.photos.length > 0 && !this.state.loadedAllPages && (
+          <Button onClick={this.loadImages}>Load more</Button>
+        )}
+
+        {isLoading && <Loader />}
       </>
     );
   }
 }
-
-// try {
-//   const responce = await axios.get(BASE_URL, {
-//     params: {
-//       key: API_KEY,
-//     },
-//   });
-
-//   this.setState({ photos: responce.data });
-// } catch (error) {}
-
-// `${BASE_URL}?key=${API_KEY}&q=yellow+flowers&image_type=photo`;
