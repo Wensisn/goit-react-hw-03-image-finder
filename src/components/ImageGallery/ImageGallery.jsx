@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Component } from 'react';
+import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import css from './ImageGallery.module.css';
 
 export class ImageGallery extends Component {
@@ -13,20 +13,20 @@ export class ImageGallery extends Component {
       })
     ),
     page: PropTypes.number.isRequired,
-    // onClick: PropTypes.func.isRequired,!!!!!
+    onOpenImage: PropTypes.func.isRequired,
   };
   render() {
-    const { photos, onClick } = this.props;
+    const { photos, onOpenImage } = this.props;
     return (
       <main className={css.main}>
         <ul className={css.ImageGallery}>
-          {photos.map(({ id, webformatURL, tags }) => (
+          {photos.map(({ id, webformatURL, tags, largeImageURL }) => (
             <ImageGalleryItem
               id={id}
-              key={id}
               imageURL={webformatURL}
               tags={tags}
-              // onClick={onClick}!!!!!!
+              onOpenImage={onOpenImage}
+              largeImageURL={() => largeImageURL}
             />
           ))}
         </ul>

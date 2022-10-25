@@ -1,5 +1,4 @@
 import { Component } from 'react';
-import { BsFillPaletteFill } from 'react-icons/bs';
 import { ThreeDots } from 'react-loader-spinner';
 import css from './Loader.module.css';
 export class Loader extends Component {
@@ -12,7 +11,7 @@ export class Loader extends Component {
         <div className={css.loading}>
           <ThreeDots
             height="80"
-            width="800"
+            width="500"
             radius="9"
             color="#4fa94d"
             ariaLabel="three-dots-loading"

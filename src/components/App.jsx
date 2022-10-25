@@ -4,6 +4,7 @@ import fetchImages from './FetchImages/FetchImages';
 import { Button } from './Button/Button';
 import { Searchbar } from './Searchbar/Searchbar';
 import { Loader } from './Loader/Loader';
+import Modal from './Modal/Modal';
 
 export class App extends Component {
   state = {
@@ -15,6 +16,8 @@ export class App extends Component {
     loadedAllPages: false,
     isLoading: false,
     error: null,
+    ShowModal: false,
+    largeImage: '',
   };
 
   async componentDidUpdate(prevProps, prevState) {
@@ -43,20 +46,19 @@ export class App extends Component {
 
       try {
         const data = await fetchImages(searchQuery, page);
-        setTimeout(() => {
-          this.setState(prevState => {
-            const state = {
-              photos: [...prevState.photos, ...data.hits],
-              page: prevState.page + 1,
-            };
 
-            if (data.totalHits === state.photos.length) {
-              state.loadedAllPages = true;
-            }
+        this.setState(prevState => {
+          const state = {
+            photos: [...prevState.photos, ...data.hits],
+            page: prevState.page + 1,
+          };
 
-            return state;
-          });
-        }, 2000);
+          if (data.totalHits === state.photos.length) {
+            state.loadedAllPages = true;
+          }
+
+          return state;
+        });
       } catch (error) {
         this.setState({ error });
       } finally {
@@ -65,23 +67,34 @@ export class App extends Component {
     }
   };
 
-  // openImage = id => {
-  //   const photoCard = this.state.photos.find(item => item.id === id);
-  //   this.setState({ photoCard });
-  //   console.log(photoCard);
-  // };!!!!!
+  handleGalleryItem = fullImageUrl => {
+    this.setState({
+      largeImage: fullImageUrl,
+      showModal: true,
+    });
+    console.log('CLICK');
+  };
+
+  toggleModal = () => {
+    this.setState(({ ShowModal }) => ({
+      ShowModal: !ShowModal,
+    }));
+    console.log('CLICK');
+  };
 
   render() {
-    const { photos, searchQuery, isLoading, error } = this.state;
+    const { photos, searchQuery, isLoading, error, ShowModal, largeImage } =
+      this.state;
     return (
       <>
         <Searchbar onSubmit={this.changeSearchQuery} />
 
         {photos && (
           <ImageGallery
-            photos={this.state.photos}
+            id={photos.id}
+            photos={photos}
             page={this.state.page}
-            // onClick={this.openImage}!!!!!!
+            onOpenImage={this.handleGalleryItem}
           />
         )}
 
@@ -90,6 +103,12 @@ export class App extends Component {
         )}
 
         {isLoading && <Loader />}
+
+        {ShowModal && (
+          <Modal onClose={this.toggleModal}>
+            <img src={largeImage} alt={largeImage} className="Modal-image" />
+          </Modal>
+        )}
       </>
     );
   }
