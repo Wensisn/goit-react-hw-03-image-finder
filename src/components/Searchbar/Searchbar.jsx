@@ -2,13 +2,7 @@ import { Component } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import css from './Searchbar.module.css';
-import {
-  ifEmptySearchAlert,
-  ifNoImagesFoundAlert,
-  ifEndOfSearchAlert,
-  ifImagesFoundAlert,
-  ifDublicateSearch,
-} from '../Notiflix/Notiflix';
+import { ifEmptySearchAlert } from '../Notiflix/Notiflix';
 
 export class Searchbar extends Component {
   static propTypes = {

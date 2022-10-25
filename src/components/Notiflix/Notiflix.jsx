@@ -2,7 +2,7 @@ import Notiflix from 'notiflix';
 
 function ifEmptySearchAlert() {
   Notiflix.Notify.failure(
-    'Рядок пошуку порожній. Будь ласка, введіть свій пошуковий запит.'
+    'The search bar is empty. Please enter your search query.'
   );
 }
 function ifNoImagesFoundAlert() {

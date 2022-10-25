@@ -1,7 +1,8 @@
 import { Component } from 'react';
+import { createPortal } from 'react-dom';
 import css from './Modal.module.css';
 
-const modalRoot = document.querySelector('modal-root');
+const modalRoot = document.getElementById('modal-root');
 
 export default class Modal extends Component {
   componentDidMount() {
@@ -27,12 +28,10 @@ export default class Modal extends Component {
   render() {
     const { children } = this.props;
 
-    return (
-      (
-        <div className={css.Overlay} onClick={this.handleBackdpropClick}>
-          <div className={css.Modal}>{children}</div>
-        </div>
-      ),
+    return createPortal(
+      <div className={css.Overlay} onClick={this.handleBackdpropClick}>
+        <div className={css.Modal}>{children}</div>
+      </div>,
       modalRoot
     );
   }

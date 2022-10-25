@@ -11,13 +11,10 @@ export class App extends Component {
     searchQuery: '',
     page: 1,
     photos: [],
-    loading: false,
-    photoCard: null,
     loadedAllPages: false,
     isLoading: false,
     error: null,
-    ShowModal: false,
-    largeImage: '',
+    ShowModal: null,
   };
 
   async componentDidUpdate(prevProps, prevState) {
@@ -67,46 +64,44 @@ export class App extends Component {
     }
   };
 
-  handleGalleryItem = fullImageUrl => {
-    this.setState({
-      largeImage: fullImageUrl,
-      showModal: true,
-    });
-    console.log('CLICK');
+  openImage = id => {
+    const ShowModal = this.state.photos.find(item => item.id === id);
+    this.setState({ ShowModal });
   };
 
-  toggleModal = () => {
-    this.setState(({ ShowModal }) => ({
-      ShowModal: !ShowModal,
-    }));
-    console.log('CLICK');
+  closeImage = () => {
+    this.setState({ ShowModal: null });
   };
 
   render() {
-    const { photos, searchQuery, isLoading, error, ShowModal, largeImage } =
-      this.state;
+    const { photos, page, isLoading, ShowModal, loadedAllPages } = this.state;
     return (
       <>
         <Searchbar onSubmit={this.changeSearchQuery} />
 
         {photos && (
           <ImageGallery
-            id={photos.id}
             photos={photos}
-            page={this.state.page}
-            onOpenImage={this.handleGalleryItem}
+            page={page}
+            onOpenImage={this.openImage}
           />
         )}
 
-        {this.state.photos.length > 0 && !this.state.loadedAllPages && (
+        {photos.length > 0 && !loadedAllPages && (
           <Button onClick={this.loadImages}>Load more</Button>
         )}
 
         {isLoading && <Loader />}
 
         {ShowModal && (
-          <Modal onClose={this.toggleModal}>
-            <img src={largeImage} alt={largeImage} className="Modal-image" />
+          <Modal onClose={this.closeImage}>
+            {
+              <img
+                src={this.state.ShowModal.largeImageURL}
+                alt={this.state.ShowModal.tags}
+                width="100%"
+              />
+            }
           </Modal>
         )}
       </>
